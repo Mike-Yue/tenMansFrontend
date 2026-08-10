@@ -13,7 +13,8 @@ export function getMatch(matchId: number): Promise<MatchDetail> {
   return apiGet<MatchDetail>(`/api/matches/${matchId}`)
 }
 
-// POST /api/matches — create a new (currently randomized) match. Returns it.
+// POST /api/matches/random — fabricate a fully formed random match (dev stand-in
+// for the real upload/parse pipeline). Returns the created match.
 export function createMatch(): Promise<Match> {
-  return apiPost<Match>('/api/matches')
+  return apiPost<Match>('/api/matches/random')
 }

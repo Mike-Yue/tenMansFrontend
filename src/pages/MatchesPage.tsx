@@ -5,6 +5,7 @@ import { useAsync } from '../hooks/useAsync'
 import { Cell, Row, Table } from '../components/Table'
 import { Empty, ErrorState, Loading } from '../components/States'
 import { PageHeader } from '../components/PageHeader'
+import { StatusBadge } from '../components/StatusBadge'
 
 export function MatchesPage() {
   const navigate = useNavigate()
@@ -90,9 +91,7 @@ export function MatchesPage() {
         />
       )}
       {!loading && !error && data && data.length > 0 && (
-        <Table
-          columns={['ID', 'Map', 'Played', 'Season', 'Rounds', 'Processed']}
-        >
+        <Table columns={['ID', 'Map', 'Played', 'Season', 'Rounds', 'Status']}>
           {data.map((match) => (
             <Row
               key={match.id}
@@ -102,34 +101,22 @@ export function MatchesPage() {
                 <span className="text-slate-500">#{match.id}</span>
               </Cell>
               <Cell>
-                <span className="font-medium text-white">{match.map}</span>
+                <span className="font-medium text-white">
+                  {match.map ?? <span className="text-slate-500">—</span>}
+                </span>
               </Cell>
               <Cell>
-                <span className="text-slate-400">{match.playedAt}</span>
+                <span className="text-slate-400">{match.playedAt ?? '—'}</span>
               </Cell>
               <Cell>{match.seasonId}</Cell>
-              <Cell>{match.totalRounds}</Cell>
+              <Cell>{match.totalRounds ?? '—'}</Cell>
               <Cell>
-                <ProcessedBadge processed={match.processed} />
+                <StatusBadge status={match.status} />
               </Cell>
             </Row>
           ))}
         </Table>
       )}
     </section>
-  )
-}
-
-function ProcessedBadge({ processed }: { processed: boolean }) {
-  return processed ? (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-2.5 py-0.5 text-xs font-medium text-emerald-300 ring-1 ring-emerald-400/20">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-      Processed
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-500/10 px-2.5 py-0.5 text-xs font-medium text-slate-400 ring-1 ring-white/10">
-      <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
-      Pending
-    </span>
   )
 }

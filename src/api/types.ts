@@ -18,16 +18,26 @@ export interface PlayerStats {
   winrate: number
 }
 
-// Mirrors the Go matches.MatchResponse DTO (note: uploadHash is intentionally
-// omitted by the backend).
+// A match moves through this lifecycle from upload to parsed.
+export type MatchStatus =
+  | 'pending'
+  | 'uploaded'
+  | 'processing'
+  | 'processed'
+  | 'failed'
+
+// Mirrors the Go matches.MatchResponse DTO (note: uploadHash/storageKey are
+// intentionally omitted by the backend). The parse-derived fields are null until
+// the parser has run.
 export interface Match {
   id: number
-  map: string
-  playedAt: string
-  uploadedAt: string
-  processed: boolean
+  map: string | null
+  playedAt: string | null
+  uploadedAt: string | null
+  status: MatchStatus
   seasonId: number
-  totalRounds: number
+  totalRounds: number | null
+  createdAt: string | null
 }
 
 // One player's scoreboard line within a team. steamId is carried as a string

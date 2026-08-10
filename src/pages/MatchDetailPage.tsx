@@ -4,6 +4,7 @@ import { useAsync } from '../hooks/useAsync'
 import { ErrorState, Loading } from '../components/States'
 import { Field } from '../components/Field'
 import { TeamScoreboard } from '../components/TeamScoreboard'
+import { StatusBadge } from '../components/StatusBadge'
 
 export function MatchDetailPage() {
   const { matchId = '' } = useParams()
@@ -18,9 +19,10 @@ export function MatchDetailPage() {
       >
         <span aria-hidden>←</span> Back to matches
       </Link>
-      <h1 className="mt-3 mb-8 text-3xl font-bold tracking-tight text-white">
-        Match
-      </h1>
+      <div className="mt-3 mb-8 flex items-center gap-3">
+        <h1 className="text-3xl font-bold tracking-tight text-white">Match</h1>
+        {data && <StatusBadge status={data.status} />}
+      </div>
 
       {loading && <Loading />}
       {!loading && error != null && <ErrorState error={error} />}
@@ -29,23 +31,31 @@ export function MatchDetailPage() {
           <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-6 shadow-2xl shadow-black/40 backdrop-blur-sm">
             <dl className="grid gap-3 sm:grid-cols-2">
               <Field label="ID" value={String(data.id)} />
-              <Field label="Map" value={data.map} />
-              <Field label="Played At" value={data.playedAt} />
-              <Field label="Uploaded At" value={data.uploadedAt} />
+              <Field label="Map" value={data.map ?? '—'} />
+              <Field label="Played At" value={data.playedAt ?? '—'} />
+              <Field label="Uploaded At" value={data.uploadedAt ?? '—'} />
               <Field label="Season" value={String(data.seasonId)} />
-              <Field label="Total Rounds" value={String(data.totalRounds)} />
-              <Field label="Processed" value={data.processed ? 'Yes' : 'No'} />
+              <Field
+                label="Total Rounds"
+                value={data.totalRounds != null ? String(data.totalRounds) : '—'}
+              />
             </dl>
           </div>
 
           <div className="mt-10 mb-4">
             <h2 className="text-xl font-semibold text-white">Scoreboard</h2>
           </div>
-          <div className="space-y-8">
-            {data.teams.map((team) => (
-              <TeamScoreboard key={team.id} team={team} />
-            ))}
-          </div>
+          {data.teams.length > 0 ? (
+            <div className="space-y-8">
+              {data.teams.map((team) => (
+                <TeamScoreboard key={team.id} team={team} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center text-slate-400">
+              This match hasn't been parsed yet.
+            </div>
+          )}
         </>
       )}
     </section>
