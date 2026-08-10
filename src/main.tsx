@@ -1,0 +1,31 @@
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+} from 'react-router-dom'
+import './index.css'
+import { Layout } from './components/Layout'
+import { UsersPage } from './pages/UsersPage'
+import { UserDetailPage } from './pages/UserDetailPage'
+import { MatchesPage } from './pages/MatchesPage'
+import { MatchDetailPage } from './pages/MatchDetailPage'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route index element={<Navigate to="/users" replace />} />
+          <Route path="users" element={<UsersPage />} />
+          <Route path="users/:steamId" element={<UserDetailPage />} />
+          <Route path="matches" element={<MatchesPage />} />
+          <Route path="matches/:matchId" element={<MatchDetailPage />} />
+          <Route path="*" element={<Navigate to="/users" replace />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  </StrictMode>,
+)
