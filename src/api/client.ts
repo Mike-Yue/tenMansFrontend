@@ -1,3 +1,13 @@
+// Base URL of the backend API. In production this points at the deployed
+// backend (VITE_API_BASE_URL); when empty (local dev) requests stay relative and
+// go through the Vite proxy. A trailing slash is trimmed so paths like
+// "/api/users" don't produce a double slash.
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
+
+function apiUrl(path: string): string {
+  return API_BASE + path
+}
+
 // ApiError carries the HTTP status so callers can distinguish, e.g., a 501
 // "not implemented" stub from a real 404 or 500.
 export class ApiError extends Error {
@@ -33,7 +43,7 @@ function parseJsonPreservingBigInts(text: string): unknown {
 // apiGet fetches a relative /api path and returns the parsed body as T.
 // On a non-2xx response it throws an ApiError carrying the status code.
 export async function apiGet<T>(path: string): Promise<T> {
-  const res = await fetch(path, {
+  const res = await fetch(apiUrl(path), {
     headers: { Accept: 'application/json' },
   })
 
@@ -50,7 +60,7 @@ export async function apiGet<T>(path: string): Promise<T> {
 // apiPost sends a POST to a relative /api path and returns the parsed body as T.
 // On a non-2xx response it throws an ApiError carrying the status code.
 export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
-  const res = await fetch(path, {
+  const res = await fetch(apiUrl(path), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: body !== undefined ? JSON.stringify(body) : undefined,
