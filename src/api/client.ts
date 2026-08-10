@@ -46,3 +46,22 @@ export async function apiGet<T>(path: string): Promise<T> {
 
   return parseJsonPreservingBigInts(text) as T
 }
+
+// apiPost sends a POST to a relative /api path and returns the parsed body as T.
+// On a non-2xx response it throws an ApiError carrying the status code.
+export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  })
+
+  const text = await res.text()
+
+  if (!res.ok) {
+    const message = text.trim() || res.statusText
+    throw new ApiError(res.status, message)
+  }
+
+  return parseJsonPreservingBigInts(text) as T
+}

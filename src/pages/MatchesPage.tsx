@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { listMatches } from '../api/matches'
+import { createMatch, listMatches } from '../api/matches'
 import { useAsync } from '../hooks/useAsync'
 import { Cell, Row, Table } from '../components/Table'
 import { Empty, ErrorState, Loading } from '../components/States'
@@ -11,11 +11,40 @@ export function MatchesPage() {
   // Controlled season filter. Empty string = no filter (all seasons).
   const [seasonInput, setSeasonInput] = useState('')
 
+  // Bumping refreshKey re-runs the list query (e.g. after creating a match).
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [creating, setCreating] = useState(false)
+  const [createError, setCreateError] = useState<string | null>(null)
+
   const seasonId = seasonInput.trim() === '' ? undefined : Number(seasonInput)
 
   const { data, error, loading } = useAsync(
     () => listMatches(seasonId),
-    [seasonId],
+    [seasonId, refreshKey],
+  )
+
+  async function handleCreate() {
+    setCreating(true)
+    setCreateError(null)
+    try {
+      await createMatch()
+      setRefreshKey((k) => k + 1)
+    } catch (e) {
+      setCreateError(e instanceof Error ? e.message : 'Failed to create match.')
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  const createButton = (
+    <button
+      type="button"
+      onClick={handleCreate}
+      disabled={creating}
+      className="rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-1.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      {creating ? 'Creating…' : '+ New match'}
+    </button>
   )
 
   const seasonFilter = (
@@ -37,8 +66,17 @@ export function MatchesPage() {
       <PageHeader
         title="Matches"
         subtitle="Games played across all seasons"
-        actions={seasonFilter}
+        actions={
+          <>
+            {seasonFilter}
+            {createButton}
+          </>
+        }
       />
+
+      {createError != null && (
+        <p className="mb-4 text-sm text-red-300">{createError}</p>
+      )}
 
       {loading && <Loading />}
       {!loading && error != null && <ErrorState error={error} />}
