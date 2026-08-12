@@ -51,6 +51,12 @@ export interface PlayerStat {
   assists: number
   kdRatio: number
   mvps: number
+  damageAssists: number
+  flashAssists: number
+  headshotKills: number
+  totalDamage: number
+  utilityDamage: number
+  roundsPlayed: number
 }
 
 // One side of a match plus its players.

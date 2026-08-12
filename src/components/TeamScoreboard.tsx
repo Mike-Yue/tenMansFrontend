@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import type { MatchTeam } from '../api/types'
+import type { MatchTeam, PlayerStat } from '../api/types'
 import { Cell, Row, Table } from './Table'
 
 function ResultBadge({ result }: { result: MatchTeam['result'] }) {
@@ -20,6 +20,17 @@ function ResultBadge({ result }: { result: MatchTeam['result'] }) {
   )
 }
 
+// Average damage per round. Rounds played can be 0 for a match that produced no
+// rounds, so guard against dividing by zero.
+function adr(p: PlayerStat): number {
+  return p.roundsPlayed > 0 ? Math.round(p.totalDamage / p.roundsPlayed) : 0
+}
+
+// Share of kills that were headshots, as a whole percentage. Zero kills → 0%.
+function headshotPct(p: PlayerStat): number {
+  return p.kills > 0 ? Math.round((p.headshotKills / p.kills) * 100) : 0
+}
+
 export function TeamScoreboard({ team }: { team: MatchTeam }) {
   const navigate = useNavigate()
 
@@ -33,7 +44,21 @@ export function TeamScoreboard({ team }: { team: MatchTeam }) {
         </span>
       </div>
 
-      <Table columns={['Player', 'K', 'D', 'A', 'K/D', 'MVPs']}>
+      <Table
+        columns={[
+          'Player',
+          'K',
+          'D',
+          'A',
+          'K/D',
+          'ADR',
+          'HS%',
+          'Util Dmg',
+          'FA',
+          'DA',
+          'MVPs',
+        ]}
+      >
         {team.players.map((p) => (
           <Row key={p.playerId} onClick={() => navigate(`/users/${p.steamId}`)}>
             <Cell>
@@ -51,6 +76,19 @@ export function TeamScoreboard({ team }: { team: MatchTeam }) {
                 {p.kdRatio.toFixed(2)}
               </span>
             </Cell>
+            <Cell>
+              <span className="tabular-nums">{adr(p)}</span>
+            </Cell>
+            <Cell>
+              <span className="tabular-nums text-slate-300">
+                {headshotPct(p)}%
+              </span>
+            </Cell>
+            <Cell>
+              <span className="tabular-nums">{p.utilityDamage}</span>
+            </Cell>
+            <Cell>{p.flashAssists}</Cell>
+            <Cell>{p.damageAssists}</Cell>
             <Cell>{p.mvps}</Cell>
           </Row>
         ))}
