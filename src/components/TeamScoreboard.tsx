@@ -54,8 +54,8 @@ export function TeamScoreboard({ team }: { team: MatchTeam }) {
           'ADR',
           'HS%',
           'Util Dmg',
-          'FA',
-          'DA',
+          'Flash Assists',
+          'Damage Assists',
           'MVPs',
         ]}
       >

@@ -22,7 +22,6 @@ export interface PlayerStats {
 export type MatchStatus =
   | 'pending'
   | 'uploaded'
-  | 'processing'
   | 'processed'
   | 'failed'
 
@@ -33,7 +32,6 @@ export interface Match {
   id: number
   map: string | null
   playedAt: string | null
-  uploadedAt: string | null
   status: MatchStatus
   seasonId: number
   totalRounds: number | null

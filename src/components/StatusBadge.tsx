@@ -18,13 +18,6 @@ const styles: Record<
     ring: 'ring-sky-400/20',
     dot: 'bg-sky-400',
   },
-  processing: {
-    label: 'Processing',
-    bg: 'bg-amber-400/10',
-    text: 'text-amber-300',
-    ring: 'ring-amber-400/20',
-    dot: 'bg-amber-400',
-  },
   processed: {
     label: 'Processed',
     bg: 'bg-emerald-400/10',

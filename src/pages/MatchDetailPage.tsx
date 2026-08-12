@@ -33,7 +33,6 @@ export function MatchDetailPage() {
               <Field label="ID" value={String(data.id)} />
               <Field label="Map" value={data.map ?? '—'} />
               <Field label="Played At" value={data.playedAt ?? '—'} />
-              <Field label="Uploaded At" value={data.uploadedAt ?? '—'} />
               <Field label="Season" value={String(data.seasonId)} />
               <Field
                 label="Total Rounds"
