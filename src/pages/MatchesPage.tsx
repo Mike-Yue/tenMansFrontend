@@ -6,8 +6,9 @@ import { ApiError } from '../api/client'
 import { useAsync } from '../hooks/useAsync'
 import { Cell, Row, Table } from '../components/Table'
 import { Empty, ErrorState, Loading } from '../components/States'
-import { PageHeader } from '../components/PageHeader'
+import { PageHeader, Chip } from '../components/PageHeader'
 import { StatusBadge } from '../components/StatusBadge'
+import type { Match } from '../api/types'
 
 export function MatchesPage() {
   const navigate = useNavigate()
@@ -31,6 +32,33 @@ export function MatchesPage() {
     () => listMatches(seasonId),
     [seasonId, refreshKey],
   )
+
+  // Split matches by lifecycle: fully-parsed ("processed") vs. everything still
+  // waiting on the parser (pending/uploaded/failed).
+  const processed = data?.filter((m) => m.status === 'processed') ?? []
+  const unprocessed = data?.filter((m) => m.status !== 'processed') ?? []
+
+  const renderRows = (matches: Match[]) =>
+    matches.map((match) => (
+      <Row key={match.id} onClick={() => navigate(`/matches/${match.id}`)}>
+        <Cell>
+          <span className="text-slate-500">#{match.id}</span>
+        </Cell>
+        <Cell>
+          <span className="font-medium text-white">
+            {match.map ?? <span className="text-slate-500">—</span>}
+          </span>
+        </Cell>
+        <Cell>
+          <span className="text-slate-400">{match.playedAt ?? '—'}</span>
+        </Cell>
+        <Cell>{match.seasonId}</Cell>
+        <Cell>{match.totalRounds ?? '—'}</Cell>
+        <Cell>
+          <StatusBadge status={match.status} />
+        </Cell>
+      </Row>
+    ))
 
   // The real flow: hash the chosen demo client-side, then reserve a pending match
   // keyed by that hash. The match stays `pending` until the parser hydrates it via
@@ -148,31 +176,39 @@ export function MatchesPage() {
         />
       )}
       {!loading && !error && data && data.length > 0 && (
-        <Table columns={['ID', 'Map', 'Played', 'Season', 'Rounds', 'Status']}>
-          {data.map((match) => (
-            <Row
-              key={match.id}
-              onClick={() => navigate(`/matches/${match.id}`)}
-            >
-              <Cell>
-                <span className="text-slate-500">#{match.id}</span>
-              </Cell>
-              <Cell>
-                <span className="font-medium text-white">
-                  {match.map ?? <span className="text-slate-500">—</span>}
-                </span>
-              </Cell>
-              <Cell>
-                <span className="text-slate-400">{match.playedAt ?? '—'}</span>
-              </Cell>
-              <Cell>{match.seasonId}</Cell>
-              <Cell>{match.totalRounds ?? '—'}</Cell>
-              <Cell>
-                <StatusBadge status={match.status} />
-              </Cell>
-            </Row>
-          ))}
-        </Table>
+        <div className="space-y-8">
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-white">Processed</h2>
+              <Chip>{processed.length}</Chip>
+            </div>
+            {processed.length > 0 ? (
+              <Table
+                columns={['ID', 'Map', 'Played', 'Season', 'Rounds', 'Status']}
+              >
+                {renderRows(processed)}
+              </Table>
+            ) : (
+              <Empty message="No processed matches." />
+            )}
+          </div>
+
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-white">Unprocessed</h2>
+              <Chip>{unprocessed.length}</Chip>
+            </div>
+            {unprocessed.length > 0 ? (
+              <Table
+                columns={['ID', 'Map', 'Played', 'Season', 'Rounds', 'Status']}
+              >
+                {renderRows(unprocessed)}
+              </Table>
+            ) : (
+              <Empty message="No unprocessed matches." />
+            )}
+          </div>
+        </div>
       )}
     </section>
   )
