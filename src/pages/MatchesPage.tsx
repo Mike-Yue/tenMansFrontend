@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createMatch, listMatches } from '../api/matches'
+import { createRandomMatch, initiateUpload, listMatches } from '../api/matches'
+import { sha256Hex } from '../api/hash'
+import { ApiError } from '../api/client'
 import { useAsync } from '../hooks/useAsync'
 import { Cell, Row, Table } from '../components/Table'
 import { Empty, ErrorState, Loading } from '../components/States'
@@ -14,8 +16,14 @@ export function MatchesPage() {
 
   // Bumping refreshKey re-runs the list query (e.g. after creating a match).
   const [refreshKey, setRefreshKey] = useState(0)
-  const [creating, setCreating] = useState(false)
-  const [createError, setCreateError] = useState<string | null>(null)
+
+  // "New match" reserves a pending match from a real .dem upload; the random
+  // generator is a separate testing-only path. They track state independently so
+  // one running doesn't disable the other.
+  const [uploading, setUploading] = useState(false)
+  const [creatingRandom, setCreatingRandom] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const seasonId = seasonInput.trim() === '' ? undefined : Number(seasonInput)
 
@@ -24,28 +32,77 @@ export function MatchesPage() {
     [seasonId, refreshKey],
   )
 
-  async function handleCreate() {
-    setCreating(true)
-    setCreateError(null)
+  // The real flow: hash the chosen demo client-side, then reserve a pending match
+  // keyed by that hash. The match stays `pending` until the parser hydrates it via
+  // POST /api/matches/upload.
+  //
+  // TODO: once the backend presigner is implemented, use the returned uploadUrl to
+  // PUT the .dem to storage, then POST /api/matches/{id}/uploaded. For now the
+  // presigner is stubbed, so we stop after reserving the pending record.
+  async function handleFileSelected(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    // Reset the input so re-selecting the same file fires onChange again.
+    e.target.value = ''
+    if (!file) return
+
+    setUploading(true)
+    setActionError(null)
     try {
-      await createMatch()
+      const contentHash = await sha256Hex(file)
+      await initiateUpload(contentHash, file.size)
       setRefreshKey((k) => k + 1)
-    } catch (e) {
-      setCreateError(e instanceof Error ? e.message : 'Failed to create match.')
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        setActionError('This demo has already been uploaded.')
+      } else {
+        setActionError(
+          err instanceof Error ? err.message : 'Failed to create match.',
+        )
+      }
     } finally {
-      setCreating(false)
+      setUploading(false)
     }
   }
 
-  const createButton = (
-    <button
-      type="button"
-      onClick={handleCreate}
-      disabled={creating}
-      className="rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-1.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      {creating ? 'Creating…' : '+ New match'}
-    </button>
+  async function handleCreateRandom() {
+    setCreatingRandom(true)
+    setActionError(null)
+    try {
+      await createRandomMatch()
+      setRefreshKey((k) => k + 1)
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : 'Failed to create match.')
+    } finally {
+      setCreatingRandom(false)
+    }
+  }
+
+  const createButtons = (
+    <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".dem"
+        onChange={handleFileSelected}
+        className="hidden"
+      />
+      <button
+        type="button"
+        onClick={() => handleCreateRandom()}
+        disabled={creatingRandom}
+        className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {creatingRandom ? 'Creating…' : 'Random match generation (testing)'}
+      </button>
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={uploading}
+        className="rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-1.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {uploading ? 'Uploading…' : '+ New match'}
+      </button>
+    </>
   )
 
   const seasonFilter = (
@@ -70,13 +127,13 @@ export function MatchesPage() {
         actions={
           <>
             {seasonFilter}
-            {createButton}
+            {createButtons}
           </>
         }
       />
 
-      {createError != null && (
-        <p className="mb-4 text-sm text-red-300">{createError}</p>
+      {actionError != null && (
+        <p className="mb-4 text-sm text-red-300">{actionError}</p>
       )}
 
       {loading && <Loading />}

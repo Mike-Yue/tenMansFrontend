@@ -72,3 +72,12 @@ export interface MatchTeam {
 export interface MatchDetail extends Match {
   teams: MatchTeam[]
 }
+
+// Mirrors the Go matches.initiateResponse DTO (POST /api/matches): the reserved
+// match id, the storage key the demo will live under, and the presigned upload
+// URL (currently empty while the backend presigner is stubbed).
+export interface InitiateUploadResponse {
+  matchId: number
+  storageKey: string
+  uploadUrl: string
+}
