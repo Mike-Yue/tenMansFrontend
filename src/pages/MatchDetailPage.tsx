@@ -1,16 +1,34 @@
-import { Link, useParams } from 'react-router-dom'
-import { getMatch } from '../api/matches'
+import { useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { deleteMatch, getMatch } from '../api/matches'
 import { useAsync } from '../hooks/useAsync'
 import { ErrorState, Loading } from '../components/States'
 import { Field } from '../components/Field'
 import { TeamScoreboard } from '../components/TeamScoreboard'
 import { StatusBadge } from '../components/StatusBadge'
+import { DeleteButton } from '../components/DeleteButton'
 import { formatDateTime } from '../format'
 
 export function MatchDetailPage() {
   const { matchId = '' } = useParams()
+  const navigate = useNavigate()
   const id = Number(matchId)
   const { data, error, loading } = useAsync(() => getMatch(id), [id])
+  const [deleting, setDeleting] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
+
+  async function handleDelete() {
+    if (!window.confirm(`Delete match #${id}?`)) return
+    setDeleting(true)
+    setActionError(null)
+    try {
+      await deleteMatch(id)
+      navigate('/matches')
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Failed to delete match.')
+      setDeleting(false)
+    }
+  }
 
   return (
     <section>
@@ -23,7 +41,16 @@ export function MatchDetailPage() {
       <div className="mt-3 mb-8 flex items-center gap-3">
         <h1 className="text-3xl font-bold tracking-tight text-white">Match</h1>
         {data && <StatusBadge status={data.status} />}
+        {data && (
+          <div className="ml-auto">
+            <DeleteButton disabled={deleting} onClick={handleDelete} />
+          </div>
+        )}
       </div>
+
+      {actionError != null && (
+        <p className="mb-4 text-sm text-red-300">{actionError}</p>
+      )}
 
       {loading && <Loading />}
       {!loading && error != null && <ErrorState error={error} />}

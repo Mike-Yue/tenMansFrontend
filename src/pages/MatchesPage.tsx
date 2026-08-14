@@ -1,6 +1,11 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createRandomMatch, initiateUpload, listMatches } from '../api/matches'
+import {
+  createRandomMatch,
+  deleteMatch,
+  initiateUpload,
+  listMatches,
+} from '../api/matches'
 import { sha256Hex } from '../api/hash'
 import { ApiError } from '../api/client'
 import { useAsync } from '../hooks/useAsync'
@@ -8,6 +13,7 @@ import { Cell, Row, Table } from '../components/Table'
 import { Empty, ErrorState, Loading } from '../components/States'
 import { PageHeader, Chip } from '../components/PageHeader'
 import { StatusBadge } from '../components/StatusBadge'
+import { DeleteButton } from '../components/DeleteButton'
 import { formatDateTime } from '../format'
 import type { Match } from '../api/types'
 
@@ -24,6 +30,7 @@ export function MatchesPage() {
   // one running doesn't disable the other.
   const [uploading, setUploading] = useState(false)
   const [creatingRandom, setCreatingRandom] = useState(false)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -50,6 +57,22 @@ export function MatchesPage() {
     byNewest((m) => m.createdAt),
   )
 
+  async function handleDelete(match: Match) {
+    if (!window.confirm(`Delete match #${match.id}${match.map ? ` (${match.map})` : ''}?`)) {
+      return
+    }
+    setDeletingId(match.id)
+    setActionError(null)
+    try {
+      await deleteMatch(match.id)
+      setRefreshKey((k) => k + 1)
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Failed to delete match.')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   const renderRows = (matches: Match[]) =>
     matches.map((match) => (
       <Row key={match.id} onClick={() => navigate(`/matches/${match.id}`)}>
@@ -68,6 +91,15 @@ export function MatchesPage() {
         <Cell>{match.totalRounds ?? '—'}</Cell>
         <Cell>
           <StatusBadge status={match.status} />
+        </Cell>
+        <Cell>
+          <DeleteButton
+            disabled={deletingId === match.id}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleDelete(match)
+            }}
+          />
         </Cell>
       </Row>
     ))
@@ -196,7 +228,7 @@ export function MatchesPage() {
             </div>
             {processed.length > 0 ? (
               <Table
-                columns={['ID', 'Map', 'Played', 'Season', 'Rounds', 'Status']}
+                columns={['ID', 'Map', 'Played', 'Season', 'Rounds', 'Status', '']}
               >
                 {renderRows(processed)}
               </Table>
@@ -212,7 +244,7 @@ export function MatchesPage() {
             </div>
             {unprocessed.length > 0 ? (
               <Table
-                columns={['ID', 'Map', 'Played', 'Season', 'Rounds', 'Status']}
+                columns={['ID', 'Map', 'Played', 'Season', 'Rounds', 'Status', '']}
               >
                 {renderRows(unprocessed)}
               </Table>

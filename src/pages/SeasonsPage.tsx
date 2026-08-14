@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react'
-import { createSeason, listSeasons } from '../api/seasons'
+import { createSeason, deleteSeason, listSeasons } from '../api/seasons'
 import { ApiError } from '../api/client'
 import { useAsync } from '../hooks/useAsync'
 import { Cell, Row, Table } from '../components/Table'
 import { Empty, ErrorState, Loading } from '../components/States'
 import { PageHeader } from '../components/PageHeader'
+import { DeleteButton } from '../components/DeleteButton'
+import type { Season } from '../api/types'
 
 const inputClass =
   'rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-sm text-slate-100 placeholder:text-slate-600 focus:border-indigo-400/40 focus:ring-1 focus:ring-indigo-400/30 focus:outline-none [color-scheme:dark]'
@@ -18,8 +20,29 @@ export function SeasonsPage() {
   const [endAt, setEndAt] = useState('')
   const [creating, setCreating] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
 
   const { data, error, loading } = useAsync(() => listSeasons(), [refreshKey])
+
+  async function handleDelete(season: Season) {
+    if (!window.confirm(`Delete season "${season.name}"?`)) return
+    setDeletingId(season.id)
+    setFormError(null)
+    try {
+      await deleteSeason(season.id)
+      setRefreshKey((k) => k + 1)
+    } catch (err) {
+      setFormError(
+        err instanceof ApiError && err.status === 409
+          ? "Can't delete — this season has matches."
+          : err instanceof Error
+            ? err.message
+            : 'Failed to delete season.',
+      )
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault()
@@ -102,7 +125,7 @@ export function SeasonsPage() {
         <Empty message="No seasons yet. Create one above." />
       )}
       {!loading && !error && data && data.length > 0 && (
-        <Table columns={['ID', 'Name', 'Start', 'End']}>
+        <Table columns={['ID', 'Name', 'Start', 'End', '']}>
           {data.map((season) => (
             <Row key={season.id}>
               <Cell>
@@ -116,6 +139,12 @@ export function SeasonsPage() {
               </Cell>
               <Cell>
                 <span className="text-slate-400">{season.endAt}</span>
+              </Cell>
+              <Cell>
+                <DeleteButton
+                  disabled={deletingId === season.id}
+                  onClick={() => handleDelete(season)}
+                />
               </Cell>
             </Row>
           ))}

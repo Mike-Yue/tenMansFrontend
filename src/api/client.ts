@@ -57,6 +57,25 @@ export async function apiGet<T>(path: string): Promise<T> {
   return parseJsonPreservingBigInts(text) as T
 }
 
+// apiDelete sends a DELETE to a relative /api path. DELETE endpoints here return
+// 204 No Content, so callers typically type T as void; an empty body parses to null.
+// On a non-2xx response it throws an ApiError carrying the status code.
+export async function apiDelete<T>(path: string): Promise<T> {
+  const res = await fetch(apiUrl(path), {
+    method: 'DELETE',
+    headers: { Accept: 'application/json' },
+  })
+
+  const text = await res.text()
+
+  if (!res.ok) {
+    const message = text.trim() || res.statusText
+    throw new ApiError(res.status, message)
+  }
+
+  return parseJsonPreservingBigInts(text) as T
+}
+
 // apiPost sends a POST to a relative /api path and returns the parsed body as T.
 // On a non-2xx response it throws an ApiError carrying the status code.
 export async function apiPost<T>(path: string, body?: unknown): Promise<T> {

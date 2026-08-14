@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from './client'
+import { apiDelete, apiGet, apiPost } from './client'
 import type { InitiateUploadResponse, Match, MatchDetail } from './types'
 
 // GET /api/matches?season={id} — season is optional; omitting it returns all.
@@ -11,6 +11,11 @@ export function listMatches(seasonId?: number): Promise<Match[]> {
 // GET /api/matches/{matchId} — a single match with its teams and player stats.
 export function getMatch(matchId: number): Promise<MatchDetail> {
   return apiGet<MatchDetail>(`/api/matches/${matchId}`)
+}
+
+// DELETE /api/matches/{matchId} — removes the match and its teams/stats.
+export function deleteMatch(matchId: number): Promise<void> {
+  return apiDelete<void>(`/api/matches/${matchId}`)
 }
 
 // POST /api/matches/random — fabricate a fully formed random match. This is a

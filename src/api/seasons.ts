@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from './client'
+import { apiDelete, apiGet, apiPost } from './client'
 import type { Season } from './types'
 
 // GET /api/seasons — list all seasons, newest first.
@@ -14,4 +14,10 @@ export function createSeason(
   endAt: string,
 ): Promise<Season> {
   return apiPost<Season>('/api/seasons', { name, startAt, endAt })
+}
+
+// DELETE /api/seasons/{id} — only succeeds if no matches reference the season
+// (the backend returns 409 otherwise).
+export function deleteSeason(id: number): Promise<void> {
+  return apiDelete<void>(`/api/seasons/${id}`)
 }
