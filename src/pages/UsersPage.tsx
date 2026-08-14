@@ -4,6 +4,7 @@ import { useAsync } from '../hooks/useAsync'
 import { Cell, Row, Table } from '../components/Table'
 import { Empty, ErrorState, Loading } from '../components/States'
 import { Chip, PageHeader } from '../components/PageHeader'
+import { formatDateTime } from '../format'
 
 export function UsersPage() {
   const navigate = useNavigate()
@@ -45,7 +46,7 @@ export function UsersPage() {
                 </span>
               </Cell>
               <Cell>
-                <span className="text-slate-400">{user.createdAt}</span>
+                <span className="text-slate-400">{formatDateTime(user.createdAt)}</span>
               </Cell>
             </Row>
           ))}

@@ -8,6 +8,7 @@ import { Cell, Row, Table } from '../components/Table'
 import { Empty, ErrorState, Loading } from '../components/States'
 import { PageHeader, Chip } from '../components/PageHeader'
 import { StatusBadge } from '../components/StatusBadge'
+import { formatDateTime } from '../format'
 import type { Match } from '../api/types'
 
 export function MatchesPage() {
@@ -61,7 +62,7 @@ export function MatchesPage() {
           </span>
         </Cell>
         <Cell>
-          <span className="text-slate-400">{match.playedAt ?? '—'}</span>
+          <span className="text-slate-400">{formatDateTime(match.playedAt)}</span>
         </Cell>
         <Cell>{match.seasonId}</Cell>
         <Cell>{match.totalRounds ?? '—'}</Cell>

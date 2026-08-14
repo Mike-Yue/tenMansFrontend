@@ -5,6 +5,7 @@ import { useAsync } from '../hooks/useAsync'
 import { ErrorState, Loading } from '../components/States'
 import { Field } from '../components/Field'
 import { StatsPanel } from '../components/StatsPanel'
+import { formatDateTime } from '../format'
 
 export function UserDetailPage() {
   const { steamId = '' } = useParams()
@@ -37,7 +38,7 @@ export function UserDetailPage() {
             <Field label="ID" value={String(profile.data.id)} />
             <Field label="Username" value={profile.data.steamUsername ?? '—'} />
             <Field label="Steam ID" value={profile.data.steamId} mono />
-            <Field label="Created" value={profile.data.createdAt} />
+            <Field label="Created" value={formatDateTime(profile.data.createdAt)} />
           </dl>
         </div>
       )}

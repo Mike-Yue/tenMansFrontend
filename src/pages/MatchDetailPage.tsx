@@ -5,6 +5,7 @@ import { ErrorState, Loading } from '../components/States'
 import { Field } from '../components/Field'
 import { TeamScoreboard } from '../components/TeamScoreboard'
 import { StatusBadge } from '../components/StatusBadge'
+import { formatDateTime } from '../format'
 
 export function MatchDetailPage() {
   const { matchId = '' } = useParams()
@@ -30,9 +31,19 @@ export function MatchDetailPage() {
         <>
           <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-6 shadow-2xl shadow-black/40 backdrop-blur-sm">
             <dl className="grid gap-3 sm:grid-cols-2">
-              <Field label="ID" value={String(data.id)} />
+              <Field
+                label="Score"
+                value={
+                  data.teams.length > 0
+                    ? data.teams
+                        .map((t) => t.roundsWon)
+                        .sort((a, b) => b - a)
+                        .join('-')
+                    : '—'
+                }
+              />
               <Field label="Map" value={data.map ?? '—'} />
-              <Field label="Played At" value={data.playedAt ?? '—'} />
+              <Field label="Played At" value={formatDateTime(data.playedAt)} />
               <Field label="Season" value={String(data.seasonId)} />
               <Field
                 label="Total Rounds"
