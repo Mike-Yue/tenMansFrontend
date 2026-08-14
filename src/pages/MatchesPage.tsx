@@ -33,16 +33,21 @@ export function MatchesPage() {
     [seasonId, refreshKey],
   )
 
-  // Sort newest-first by the date the match was played. `playedAt` is null until the
-  // parser runs, so fall back to `createdAt` (upload time); undated rows sort last.
-  // ISO 8601 strings are lexicographically ordered, so a plain string compare works.
-  const matchDate = (m: Match) => m.playedAt ?? m.createdAt ?? ''
-  const byNewest = (a: Match, b: Match) => matchDate(b).localeCompare(matchDate(a))
+  // Newest-first comparators. ISO 8601 strings are lexicographically ordered, so a plain
+  // string compare works; undated rows (null → '') sort last.
+  // Processed matches sort by when they were played; unprocessed matches have no `playedAt`
+  // yet, so they sort by `createdAt` (upload time).
+  const byNewest = (key: (m: Match) => string | null) => (a: Match, b: Match) =>
+    (key(b) ?? '').localeCompare(key(a) ?? '')
 
   // Split matches by lifecycle: fully-parsed ("processed") vs. everything still
   // waiting on the parser (pending/uploaded/failed).
-  const processed = (data?.filter((m) => m.status === 'processed') ?? []).sort(byNewest)
-  const unprocessed = (data?.filter((m) => m.status !== 'processed') ?? []).sort(byNewest)
+  const processed = (data?.filter((m) => m.status === 'processed') ?? []).sort(
+    byNewest((m) => m.playedAt),
+  )
+  const unprocessed = (data?.filter((m) => m.status !== 'processed') ?? []).sort(
+    byNewest((m) => m.createdAt),
+  )
 
   const renderRows = (matches: Match[]) =>
     matches.map((match) => (
