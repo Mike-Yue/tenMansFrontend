@@ -45,10 +45,6 @@ export function MatchDetailPage() {
               <Field label="Map" value={data.map ?? '—'} />
               <Field label="Played At" value={formatDateTime(data.playedAt)} />
               <Field label="Season" value={String(data.seasonId)} />
-              <Field
-                label="Total Rounds"
-                value={data.totalRounds != null ? String(data.totalRounds) : '—'}
-              />
             </dl>
           </div>
 
