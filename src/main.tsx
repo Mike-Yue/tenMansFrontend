@@ -12,6 +12,7 @@ import { UsersPage } from './pages/UsersPage'
 import { UserDetailPage } from './pages/UserDetailPage'
 import { MatchesPage } from './pages/MatchesPage'
 import { MatchDetailPage } from './pages/MatchDetailPage'
+import { SeasonsPage } from './pages/SeasonsPage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -23,6 +24,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="users/:steamId" element={<UserDetailPage />} />
           <Route path="matches" element={<MatchesPage />} />
           <Route path="matches/:matchId" element={<MatchDetailPage />} />
+          <Route path="seasons" element={<SeasonsPage />} />
           <Route path="*" element={<Navigate to="/users" replace />} />
         </Route>
       </Routes>

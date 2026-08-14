@@ -39,6 +39,9 @@ export function Layout() {
             <NavLink to="/matches" className={navClass}>
               Matches
             </NavLink>
+            <NavLink to="/seasons" className={navClass}>
+              Seasons
+            </NavLink>
           </nav>
         </div>
       </header>

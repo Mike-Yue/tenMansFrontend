@@ -18,6 +18,15 @@ export interface PlayerStats {
   winrate: number
 }
 
+// Mirrors the Go seasons.Season DTO (GET/POST /api/seasons). startAt/endAt are
+// "YYYY-MM-DD" date strings.
+export interface Season {
+  id: number
+  name: string
+  startAt: string
+  endAt: string
+}
+
 // A match moves through this lifecycle from upload to parsed.
 export type MatchStatus =
   | 'pending'
