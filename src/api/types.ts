@@ -27,6 +27,15 @@ export interface Season {
   endAt: string
 }
 
+// Mirrors the Go ratings.PlayerSeasonRating DTO (GET /api/users/{id}/ratings).
+// rating is a display-scaled OpenSkill ordinal; uncertainty (RD) is not exposed.
+export interface PlayerSeasonRating {
+  seasonId: number
+  seasonName: string
+  rating: number
+  gamesPlayed: number
+}
+
 // A match moves through this lifecycle from upload to parsed.
 export type MatchStatus =
   | 'pending'

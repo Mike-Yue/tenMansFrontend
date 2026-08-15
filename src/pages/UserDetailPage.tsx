@@ -1,19 +1,22 @@
 import { Link, useParams } from 'react-router-dom'
 import { getUser } from '../api/users'
 import { getUserStats } from '../api/stats'
+import { getUserRatings } from '../api/ratings'
 import { useAsync } from '../hooks/useAsync'
 import { ErrorState, Loading } from '../components/States'
 import { Field } from '../components/Field'
+import { Cell, Row, Table } from '../components/Table'
 import { StatsPanel } from '../components/StatsPanel'
 import { formatDateTime } from '../format'
 
 export function UserDetailPage() {
   const { steamId = '' } = useParams()
 
-  // The profile and stats endpoints are fetched independently so the stats panel
-  // renders even if the profile endpoint is unavailable (and vice versa).
+  // The profile, stats, and ratings endpoints are fetched independently so each
+  // section renders even if another endpoint is unavailable.
   const profile = useAsync(() => getUser(steamId), [steamId])
   const stats = useAsync(() => getUserStats(steamId), [steamId])
+  const ratings = useAsync(() => getUserRatings(steamId), [steamId])
 
   return (
     <section>
@@ -41,6 +44,39 @@ export function UserDetailPage() {
             <Field label="Created" value={formatDateTime(profile.data.createdAt)} />
           </dl>
         </div>
+      )}
+
+      {/* Rating */}
+      <div className="mt-10 mb-4">
+        <h2 className="text-xl font-semibold text-white">Rating</h2>
+        <p className="mt-0.5 text-sm text-slate-400">Skill rating per season</p>
+      </div>
+      {ratings.loading && <Loading />}
+      {!ratings.loading && ratings.error != null && (
+        <ErrorState error={ratings.error} />
+      )}
+      {!ratings.loading && !ratings.error && ratings.data && (
+        ratings.data.length > 0 ? (
+          <Table columns={['Season', 'Rating', 'Games']}>
+            {ratings.data.map((r) => (
+              <Row key={r.seasonId}>
+                <Cell>
+                  <span className="font-medium text-white">{r.seasonName}</span>
+                </Cell>
+                <Cell>
+                  <span className="font-semibold text-indigo-300">{r.rating}</span>
+                </Cell>
+                <Cell>
+                  <span className="text-slate-400">{r.gamesPlayed}</span>
+                </Cell>
+              </Row>
+            ))}
+          </Table>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center text-slate-400">
+            No rated games yet.
+          </div>
+        )
       )}
 
       {/* Stats */}
