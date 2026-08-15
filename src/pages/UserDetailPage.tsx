@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getUser } from '../api/users'
 import { getUserStats } from '../api/stats'
 import { getUserRatings } from '../api/ratings'
+import { listSeasons } from '../api/seasons'
 import { useAsync } from '../hooks/useAsync'
 import { ErrorState, Loading } from '../components/States'
 import { Field } from '../components/Field'
@@ -15,8 +17,31 @@ export function UserDetailPage() {
   // The profile, stats, and ratings endpoints are fetched independently so each
   // section renders even if another endpoint is unavailable.
   const profile = useAsync(() => getUser(steamId), [steamId])
-  const stats = useAsync(() => getUserStats(steamId), [steamId])
   const ratings = useAsync(() => getUserRatings(steamId), [steamId])
+
+  // Stats are scoped to a selected season (default: the latest season, or all-time
+  // when none exist). null = not yet defaulted.
+  const seasons = useAsync(() => listSeasons(), [])
+  const [seasonId, setSeasonId] = useState<number | 'all' | null>(null)
+  useEffect(() => {
+    if (seasonId === null && !seasons.loading) {
+      const latest =
+        !seasons.error && seasons.data && seasons.data.length > 0
+          ? seasons.data[0].id
+          : 'all'
+      setSeasonId(latest)
+    }
+  }, [seasons.loading, seasons.error, seasons.data, seasonId])
+
+  const statsSeason = seasonId === 'all' || seasonId === null ? undefined : seasonId
+  const stats = useAsync(
+    () => getUserStats(steamId, statsSeason),
+    [steamId, statsSeason],
+  )
+  const selectedSeasonName =
+    statsSeason !== undefined
+      ? seasons.data?.find((s) => s.id === statsSeason)?.name
+      : undefined
 
   return (
     <section>
@@ -80,11 +105,34 @@ export function UserDetailPage() {
       )}
 
       {/* Stats */}
-      <div className="mt-10 mb-4">
-        <h2 className="text-xl font-semibold text-white">Stats</h2>
-        <p className="mt-0.5 text-sm text-slate-400">
-          All-time · across all games
-        </p>
+      <div className="mt-10 mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-white">Stats</h2>
+          <p className="mt-0.5 text-sm text-slate-400">
+            {selectedSeasonName
+              ? `Season ${selectedSeasonName}`
+              : 'All time · across all games'}
+          </p>
+        </div>
+        <label className="flex items-center gap-2 text-sm text-slate-400">
+          <span>Season</span>
+          <select
+            value={seasonId ?? 'all'}
+            onChange={(e) =>
+              setSeasonId(
+                e.target.value === 'all' ? 'all' : Number(e.target.value),
+              )
+            }
+            className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-sm text-slate-100 focus:border-indigo-400/40 focus:ring-1 focus:ring-indigo-400/30 focus:outline-none [color-scheme:dark]"
+          >
+            <option value="all">All time</option>
+            {seasons.data?.map((s) => (
+              <option key={s.id} value={s.id}>
+                Season {s.name}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
       {stats.loading && <Loading />}
       {!stats.loading && stats.error != null && (

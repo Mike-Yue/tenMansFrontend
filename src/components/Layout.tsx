@@ -24,7 +24,7 @@ export function Layout() {
 
       <header className="sticky top-0 z-20 border-b border-white/5 bg-[#06070d]/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center gap-8 px-6 py-4">
-          <NavLink to="/users" className="flex items-center gap-2.5">
+          <NavLink to="/" className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-400 to-violet-600 text-sm font-black text-white shadow-lg shadow-indigo-500/30">
               10
             </span>
@@ -33,6 +33,9 @@ export function Layout() {
             </span>
           </NavLink>
           <nav className="flex gap-1">
+            <NavLink to="/" end className={navClass}>
+              Home
+            </NavLink>
             <NavLink to="/users" className={navClass}>
               Users
             </NavLink>

@@ -8,13 +8,18 @@ export interface User {
   createdAt: string
 }
 
-// Mirrors the Go stats.PlayerStats aggregate (GET /api/users/{id}/stats).
-// winrate is a fraction in [0,1]; the UI formats it as a percentage.
+// Mirrors the Go stats.PlayerStats aggregate (GET /api/users/{id}/stats, optionally
+// ?season={id}). winrate and headshotPct are fractions in [0,1]; the UI formats
+// them as percentages.
 export interface PlayerStats {
   kills: number
   deaths: number
   assists: number
   mvps: number
+  utilityDamage: number
+  flashAssists: number
+  kdRatio: number
+  headshotPct: number
   winrate: number
 }
 
