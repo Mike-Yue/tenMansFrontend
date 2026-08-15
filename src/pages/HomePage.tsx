@@ -6,6 +6,7 @@ import { StatusBadge } from '../components/StatusBadge'
 import { formatDateTime } from '../format'
 import type { Match } from '../api/types'
 
+// Order mirrors the nav (Matches, Users, Seasons).
 const cards = [
   {
     to: '/matches',
@@ -14,7 +15,7 @@ const cards = [
   },
   {
     to: '/users',
-    title: 'Players',
+    title: 'Users',
     description: "See who's playing and their all-time stats and ratings.",
   },
   {
@@ -59,7 +60,7 @@ export function HomePage() {
             to="/users"
             className="rounded-full border border-white/10 bg-white/[0.03] px-5 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/[0.06]"
           >
-            Players
+            Users
           </Link>
         </div>
       </div>

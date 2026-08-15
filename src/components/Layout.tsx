@@ -36,11 +36,11 @@ export function Layout() {
             <NavLink to="/" end className={navClass}>
               Home
             </NavLink>
-            <NavLink to="/users" className={navClass}>
-              Users
-            </NavLink>
             <NavLink to="/matches" className={navClass}>
               Matches
+            </NavLink>
+            <NavLink to="/users" className={navClass}>
+              Users
             </NavLink>
             <NavLink to="/seasons" className={navClass}>
               Seasons
