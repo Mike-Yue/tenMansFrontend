@@ -46,8 +46,7 @@ export function HomePage() {
           </span>
         </div>
         <p className="mt-4 max-w-xl text-lg text-slate-300">
-          Ten-mans, tracked. Match history, per-season ratings, and the numbers
-          that settle the arguments.
+          Just for fun, please don't tilt 😔
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link

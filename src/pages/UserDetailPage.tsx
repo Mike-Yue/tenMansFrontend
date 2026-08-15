@@ -125,9 +125,15 @@ export function UserDetailPage() {
             }
             className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-sm text-slate-100 focus:border-indigo-400/40 focus:ring-1 focus:ring-indigo-400/30 focus:outline-none [color-scheme:dark]"
           >
-            <option value="all">All time</option>
+            <option value="all" className="bg-[#0e0f1a] text-slate-100">
+              All time
+            </option>
             {seasons.data?.map((s) => (
-              <option key={s.id} value={s.id}>
+              <option
+                key={s.id}
+                value={s.id}
+                className="bg-[#0e0f1a] text-slate-100"
+              >
                 Season {s.name}
               </option>
             ))}
