@@ -3,6 +3,7 @@ import { listMatches } from '../api/matches'
 import { useAsync } from '../hooks/useAsync'
 import { Empty, ErrorState, Loading } from '../components/States'
 import { StatusBadge } from '../components/StatusBadge'
+import { QuoteBanner } from '../components/QuoteBanner'
 import { formatDateTime } from '../format'
 import type { Match } from '../api/types'
 
@@ -123,6 +124,9 @@ export function HomePage() {
           </div>
         )}
       </div>
+
+      {/* Rotating quotes */}
+      <QuoteBanner />
     </section>
   )
 }
