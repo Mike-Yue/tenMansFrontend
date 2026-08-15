@@ -4,7 +4,7 @@
 // "/api/users" don't produce a double slash.
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
 
-function apiUrl(path: string): string {
+export function apiUrl(path: string): string {
   return API_BASE + path
 }
 
@@ -44,6 +44,7 @@ function parseJsonPreservingBigInts(text: string): unknown {
 // On a non-2xx response it throws an ApiError carrying the status code.
 export async function apiGet<T>(path: string): Promise<T> {
   const res = await fetch(apiUrl(path), {
+    credentials: 'include',
     headers: { Accept: 'application/json' },
   })
 
@@ -63,6 +64,7 @@ export async function apiGet<T>(path: string): Promise<T> {
 export async function apiDelete<T>(path: string): Promise<T> {
   const res = await fetch(apiUrl(path), {
     method: 'DELETE',
+    credentials: 'include',
     headers: { Accept: 'application/json' },
   })
 
@@ -81,6 +83,7 @@ export async function apiDelete<T>(path: string): Promise<T> {
 export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   const res = await fetch(apiUrl(path), {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })

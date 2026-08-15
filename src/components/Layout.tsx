@@ -1,4 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { logout } from '../api/auth'
+import { useAuth } from '../auth/auth-context'
 
 const linkBase =
   'rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200'
@@ -10,6 +12,18 @@ function navClass({ isActive }: { isActive: boolean }) {
 }
 
 export function Layout() {
+  const { me, refresh } = useAuth()
+
+  async function handleSignOut() {
+    try {
+      await logout()
+    } finally {
+      // Re-check the session; with the cookie cleared this drops back to the
+      // sign-in screen.
+      await refresh()
+    }
+  }
+
   return (
     <div className="relative min-h-screen">
       {/* Ambient background glow */}
@@ -46,6 +60,19 @@ export function Layout() {
               Seasons
             </NavLink>
           </nav>
+
+          <div className="ml-auto flex items-center gap-3">
+            <span className="hidden max-w-[12rem] truncate text-xs text-slate-400 sm:inline">
+              {me?.steamUsername ?? me?.steamId}
+            </span>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-400 transition-all duration-200 hover:bg-white/5 hover:text-slate-100"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </header>
 
