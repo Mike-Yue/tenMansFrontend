@@ -1,4 +1,5 @@
-import { apiGet, apiPost } from './client'
+import { apiGet } from './client'
+import { clearToken } from '../auth/token'
 
 // The signed-in user's identity. Mirrors the Go auth.meResponse DTO. steamId is
 // carried as a string for the same BigInt-precision reason as User.steamId.
@@ -14,9 +15,10 @@ export function getMe(): Promise<Me> {
   return apiGet<Me>('/api/auth/me')
 }
 
-// POST /api/auth/logout — clears the session cookie.
-export function logout(): Promise<void> {
-  return apiPost<void>('/api/auth/logout')
+// Logout is entirely client-side: tokens are stateless, so signing out just means
+// discarding the stored token. Callers should refresh auth state afterwards.
+export function logout(): void {
+  clearToken()
 }
 
 // The backend endpoint that starts the Steam OpenID redirect. This must be a

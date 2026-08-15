@@ -9,7 +9,12 @@ import {
 import './index.css'
 import { AuthProvider } from './auth/AuthProvider'
 import { RequireAuth } from './auth/RequireAuth'
+import { captureTokenFromUrl } from './auth/token'
 import { Layout } from './components/Layout'
+
+// If we just returned from the Steam login, the backend put a session token in
+// the URL fragment. Capture and store it before the app reads auth state.
+captureTokenFromUrl()
 import { UsersPage } from './pages/UsersPage'
 import { UserDetailPage } from './pages/UserDetailPage'
 import { MatchesPage } from './pages/MatchesPage'

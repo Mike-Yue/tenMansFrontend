@@ -15,13 +15,10 @@ export function Layout() {
   const { me, refresh } = useAuth()
 
   async function handleSignOut() {
-    try {
-      await logout()
-    } finally {
-      // Re-check the session; with the cookie cleared this drops back to the
-      // sign-in screen.
-      await refresh()
-    }
+    logout()
+    // Re-check the session; with the token cleared this drops back to the
+    // sign-in screen.
+    await refresh()
   }
 
   return (

@@ -1,11 +1,21 @@
-// Base URL of the backend API. In production this points at the deployed
-// backend (VITE_API_BASE_URL); when empty (local dev) requests stay relative and
-// go through the Vite proxy. A trailing slash is trimmed so paths like
-// "/api/users" don't produce a double slash.
+import { getToken } from '../auth/token'
+
+// Base URL of the backend API. The app and backend are on different origins, so
+// this must point at the backend (VITE_API_BASE_URL, e.g.
+// https://tenmansbackend.onrender.com). A trailing slash is trimmed so paths
+// like "/api/users" don't produce a double slash.
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
 
 export function apiUrl(path: string): string {
   return API_BASE + path
+}
+
+// withAuth adds the bearer token (when signed in) to a set of request headers.
+// The app calls the backend cross-origin, so auth rides in this header rather
+// than a cookie.
+function withAuth(headers: Record<string, string>): Record<string, string> {
+  const token = getToken()
+  return token ? { ...headers, Authorization: `Bearer ${token}` } : headers
 }
 
 // ApiError carries the HTTP status so callers can distinguish, e.g., a 501
@@ -44,8 +54,7 @@ function parseJsonPreservingBigInts(text: string): unknown {
 // On a non-2xx response it throws an ApiError carrying the status code.
 export async function apiGet<T>(path: string): Promise<T> {
   const res = await fetch(apiUrl(path), {
-    credentials: 'include',
-    headers: { Accept: 'application/json' },
+    headers: withAuth({ Accept: 'application/json' }),
   })
 
   const text = await res.text()
@@ -64,8 +73,7 @@ export async function apiGet<T>(path: string): Promise<T> {
 export async function apiDelete<T>(path: string): Promise<T> {
   const res = await fetch(apiUrl(path), {
     method: 'DELETE',
-    credentials: 'include',
-    headers: { Accept: 'application/json' },
+    headers: withAuth({ Accept: 'application/json' }),
   })
 
   const text = await res.text()
@@ -83,8 +91,7 @@ export async function apiDelete<T>(path: string): Promise<T> {
 export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   const res = await fetch(apiUrl(path), {
     method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: withAuth({ 'Content-Type': 'application/json', Accept: 'application/json' }),
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })
 
