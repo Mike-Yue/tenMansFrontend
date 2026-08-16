@@ -3,10 +3,12 @@ import { clearToken } from '../auth/token'
 
 // The signed-in user's identity. Mirrors the Go auth.meResponse DTO. steamId is
 // carried as a string for the same BigInt-precision reason as User.steamId.
-// steamUsername is null for viewers who have never appeared in a match.
+// steamUsername and avatarUrl come from the Steam Web API (null when it's
+// unavailable — e.g. no STEAM_API_KEY on the backend).
 export interface Me {
   steamId: string
   steamUsername: string | null
+  avatarUrl: string | null
 }
 
 // GET /api/auth/me — returns the current user, or throws ApiError(401) when not

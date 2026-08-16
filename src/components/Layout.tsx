@@ -59,9 +59,18 @@ export function Layout() {
           </nav>
 
           <div className="ml-auto flex items-center gap-3">
-            <span className="hidden max-w-[12rem] truncate text-xs text-slate-400 sm:inline">
-              {me?.steamUsername ?? me?.steamId}
-            </span>
+            <div className="flex items-center gap-2">
+              {me?.avatarUrl && (
+                <img
+                  src={me.avatarUrl}
+                  alt=""
+                  className="h-7 w-7 rounded-full ring-1 ring-white/10"
+                />
+              )}
+              <span className="hidden max-w-[12rem] truncate text-xs text-slate-400 sm:inline">
+                {me?.steamUsername ?? me?.steamId}
+              </span>
+            </div>
             <button
               type="button"
               onClick={handleSignOut}
